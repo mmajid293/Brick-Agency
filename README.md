@@ -1,6 +1,6 @@
 # Smart Bhatha ERP 🧱
 
-**Complete management system for Pakistani brick kilns (بھٹہ)** — workers, production, finance, dispatch, and Urdu support.
+**Complete management system for Pakistani brick kilns. (بھٹہ)** — workers, production, finance, dispatch, and Urdu support.
 
 ![Stack](https://img.shields.io/badge/Next.js-16-black) ![Prisma](https://img.shields.io/badge/Prisma-PostgreSQL-2D3748) ![Tailwind](https://img.shields.io/badge/Tailwind-4-38B2AC)
 

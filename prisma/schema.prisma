@@ -1,0 +1,704 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+  SUPERVISOR
+  WORKER
+}
+
+enum BrickGrade {
+  RAW
+  COOKED
+  BROKEN
+  GRADE_A
+  GRADE_B
+}
+
+enum MaterialType {
+  SOIL
+  COAL
+  WOOD
+  WOOD_WASTE
+  DIESEL
+  WATER
+  SAND
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  SALARY
+  SUPPLIER_PAYMENT
+  CUSTOMER_PAYMENT
+  ADVANCE
+}
+
+enum OrderStatus {
+  QUOTATION
+  PENDING
+  CONFIRMED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum KilnBatchStatus {
+  LOADING
+  FIRING
+  COOLING
+  UNLOADED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+  HALF_DAY
+  OVERTIME
+}
+
+enum WorkerJobRole {
+  MOLDING
+  KILN_OPERATOR
+  LOADER
+  UNLOADER
+  QUALITY_CHECK
+  MAINTENANCE
+  DISPATCH
+  SECURITY
+  OFFICE
+  OTHER
+}
+
+enum WageType {
+  DAILY
+  MONTHLY
+  PER_THOUSAND_BRICKS
+  PER_TRUCK
+  SHIFT
+}
+
+enum ShiftType {
+  MORNING
+  EVENING
+  NIGHT
+  ROTATING
+  FLEXIBLE
+}
+
+enum SkillLevel {
+  TRAINEE
+  SKILLED
+  SENIOR
+  FOREMAN
+}
+
+enum AttendanceMode {
+  PRODUCTION
+  SHIFT
+  TRIP
+  STANDARD
+  TEAM_MONITOR
+}
+
+enum CustomerType {
+  BUILDER
+  CONTRACTOR
+  RETAILER
+  WHOLESALER
+  GOVERNMENT
+  OTHER
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  nameUrdu     String?
+  role         Role      @default(WORKER)
+  phone        String?
+  avatar       String?
+  isActive     Boolean   @default(true)
+  workerId     String?   @unique
+  worker       Worker?   @relation(fields: [workerId], references: [id])
+  auditLogs    AuditLog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Department {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  nameEn      String
+  nameUr      String
+  description String?
+  sortOrder   Int              @default(0)
+  isActive    Boolean          @default(true)
+  categories  WorkerCategory[]
+  workers     Worker[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model WorkerCategory {
+  id              String         @id @default(cuid())
+  code            String         @unique
+  nameEn          String
+  nameUr          String
+  descriptionEn   String?
+  descriptionUr   String?
+  departmentId    String
+  department      Department     @relation(fields: [departmentId], references: [id])
+  wageType        WageType       @default(DAILY)
+  attendanceMode  AttendanceMode @default(STANDARD)
+  legacyJobRole   WorkerJobRole?
+  defaultDailyWage Decimal       @default(1500) @db.Decimal(10, 2)
+  defaultPerBrick  Decimal       @default(0) @db.Decimal(8, 4)
+  defaultPerTruck  Decimal       @default(0) @db.Decimal(10, 2)
+  defaultMonthly   Decimal       @default(0) @db.Decimal(12, 2)
+  defaultShift     ShiftType?
+  defaultTarget    Int?
+  permissions     Json?
+  workReportKeys  Json?
+  iconKey         String         @default("users")
+  colorKey        String         @default("slate")
+  sortOrder       Int            @default(0)
+  isActive        Boolean        @default(true)
+  workers         Worker[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([departmentId])
+}
+
+model Worker {
+  id              String       @id @default(cuid())
+  workerCode      String?      @unique
+  name            String
+  nameUrdu        String?
+  fatherName      String?
+  cnic            String       @unique
+  phone           String
+  address         String
+  familyDetails   String?
+  advanceBalance  Decimal      @default(0) @db.Decimal(12, 2)
+  dailyWage       Decimal      @default(0) @db.Decimal(10, 2)
+  perBrickRate    Decimal      @default(0) @db.Decimal(8, 4)
+  monthlySalary   Decimal      @default(0) @db.Decimal(12, 2)
+  perTruckRate    Decimal      @default(0) @db.Decimal(10, 2)
+  imageUrl        String?
+  joinDate        DateTime     @default(now())
+  isActive        Boolean      @default(true)
+  department      String       @default("Production")
+  departmentId    String?
+  departmentRef   Department?  @relation(fields: [departmentId], references: [id])
+  categoryId      String?
+  category        WorkerCategory? @relation(fields: [categoryId], references: [id])
+  jobRole         WorkerJobRole @default(MOLDING)
+  wageType        WageType     @default(DAILY)
+  shiftType       ShiftType?
+  skillLevel      SkillLevel   @default(SKILLED)
+  dailyTarget     Int?
+  productionAssignment String?
+  supervisorId    String?
+  supervisor      Worker?      @relation("WorkerSupervisor", fields: [supervisorId], references: [id])
+  supervisees     Worker[]     @relation("WorkerSupervisor")
+  workDescription String?
+  standardHoursPerDay Decimal  @default(8) @db.Decimal(4, 2)
+  shiftStart      String?
+  bricksTargetPerDay Int?
+  user            User?
+  attendances     Attendance[]
+  payrolls        Payroll[]
+  advances        Advance[]
+  transactions    Transaction[]
+  productionLogs  WorkerProductionLog[]
+  dispatchLogs    WorkerDispatchLog[]
+  vehicles        Vehicle[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([name])
+  @@index([isActive])
+  @@index([department])
+  @@index([jobRole])
+  @@index([categoryId])
+  @@index([departmentId])
+  @@index([wageType])
+  @@index([shiftType])
+}
+
+model WorkerProductionLog {
+  id              String   @id @default(cuid())
+  workerId        String
+  worker          Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  date            DateTime @db.Date
+  bricksProduced  Int      @default(0)
+  moldsCompleted  Int      @default(0)
+  trucksLoaded    Int      @default(0)
+  kilnCycles      Int      @default(0)
+  fuelUsed        Decimal  @default(0) @db.Decimal(10, 2)
+  notes           String?
+  metrics         Json?
+  createdAt       DateTime @default(now())
+
+  @@unique([workerId, date])
+  @@index([date])
+}
+
+model WorkerDispatchLog {
+  id            String   @id @default(cuid())
+  workerId      String
+  worker        Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  date          DateTime @db.Date
+  truckNumber   String?
+  bricksLoaded  Int      @default(0)
+  destination   String?
+  fuelLiters    Decimal  @default(0) @db.Decimal(10, 2)
+  tripCount     Int      @default(1)
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@index([workerId, date])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  workerId  String
+  worker    Worker           @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  date      DateTime         @db.Date
+  status    AttendanceStatus @default(PRESENT)
+  checkIn   DateTime?
+  checkOut  DateTime?
+  overtime      Decimal          @default(0) @db.Decimal(5, 2)
+  regularHours  Decimal          @default(8) @db.Decimal(4, 2)
+  extraHours    Decimal          @default(0) @db.Decimal(4, 2)
+  bricksProduced Int?
+  workReport     Json?
+  taskCompleted  String?
+  qrScanned Boolean          @default(false)
+  notes     String?
+  createdAt DateTime         @default(now())
+
+  @@unique([workerId, date])
+}
+
+model Payroll {
+  id          String   @id @default(cuid())
+  workerId    String
+  worker      Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  month       Int
+  year        Int
+  baseSalary  Decimal  @db.Decimal(12, 2)
+  brickBonus  Decimal  @default(0) @db.Decimal(12, 2)
+  overtimePay Decimal  @default(0) @db.Decimal(12, 2)
+  deductions  Decimal  @default(0) @db.Decimal(12, 2)
+  netPay      Decimal  @db.Decimal(12, 2)
+  isPaid      Boolean  @default(false)
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([workerId, month, year])
+}
+
+model Advance {
+  id        String   @id @default(cuid())
+  workerId  String
+  worker    Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  amount    Decimal  @db.Decimal(12, 2)
+  reason    String?
+  date      DateTime @default(now())
+  deducted  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model BrickInventory {
+  id        String     @id @default(cuid())
+  grade     BrickGrade @unique
+  quantity  Int        @default(0)
+  updatedAt DateTime   @updatedAt
+}
+
+enum InventoryMovementType {
+  STOCK_IN
+  STOCK_OUT
+  TRANSFER
+  WASTAGE
+  PRODUCTION
+}
+
+model InventoryMovement {
+  id        String                @id @default(cuid())
+  grade     BrickGrade
+  quantity  Int
+  type      InventoryMovementType
+  fromGrade BrickGrade?
+  toGrade   BrickGrade?
+  notes     String?
+  date      DateTime              @default(now())
+  createdAt DateTime              @default(now())
+
+  @@index([grade])
+  @@index([date])
+}
+
+model Kiln {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  name        String
+  nameUr      String?
+  capacity    Int?
+  isActive    Boolean      @default(true)
+  batches     KilnBatch[]
+  logs        KilnLog[]
+  productions Production[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model KilnBatch {
+  id          String          @id @default(cuid())
+  kilnId      String
+  kiln        Kiln            @relation(fields: [kilnId], references: [id], onDelete: Cascade)
+  batchNumber Int
+  status      KilnBatchStatus @default(LOADING)
+  loadDate    DateTime        @db.Date
+  fireStart   DateTime?
+  fireEnd     DateTime?
+  unloadDate  DateTime?
+  bricksIn    Int             @default(0)
+  bricksOutA  Int             @default(0)
+  bricksOutB  Int             @default(0)
+  broken      Int             @default(0)
+  temperature Decimal?        @db.Decimal(5, 2)
+  fuelUsed    Decimal?        @db.Decimal(10, 2)
+  fuelType    String?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([kilnId, batchNumber])
+  @@index([status])
+}
+
+model Production {
+  id             String   @id @default(cuid())
+  date           DateTime @db.Date
+  kilnId         String?
+  kiln           Kiln?    @relation(fields: [kilnId], references: [id])
+  rawProduced    Int      @default(0)
+  cookedProduced Int      @default(0)
+  gradeA         Int      @default(0)
+  gradeB         Int      @default(0)
+  broken         Int      @default(0)
+  wastage        Int      @default(0)
+  kilnCycle      Int      @default(1)
+  temperature    Decimal? @db.Decimal(5, 2)
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  @@unique([date, kilnCycle])
+  @@index([kilnId])
+}
+
+model RawMaterial {
+  id           String       @id @default(cuid())
+  type         MaterialType @unique
+  quantity     Decimal      @db.Decimal(12, 2)
+  unit         String
+  minStock     Decimal      @default(0) @db.Decimal(12, 2)
+  lastPurchase DateTime?
+  updatedAt    DateTime     @updatedAt
+  stockLogs    MaterialStockLog[]
+}
+
+model MaterialStockLog {
+  id           String       @id @default(cuid())
+  materialType MaterialType
+  material     RawMaterial  @relation(fields: [materialType], references: [type], onDelete: Cascade)
+  previousQty  Decimal      @db.Decimal(12, 2)
+  newQty       Decimal      @db.Decimal(12, 2)
+  changeQty    Decimal      @db.Decimal(12, 2)
+  operation    String
+  notes        String?
+  recordedAt   DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+
+  @@index([materialType])
+  @@index([recordedAt])
+}
+
+model Supplier {
+  id        String    @id @default(cuid())
+  name      String
+  phone     String
+  address   String?
+  material  MaterialType?
+  purchases Purchase[]
+  createdAt DateTime  @default(now())
+}
+
+model Purchase {
+  id         String       @id @default(cuid())
+  supplierId String
+  supplier   Supplier     @relation(fields: [supplierId], references: [id])
+  material   MaterialType
+  quantity   Decimal      @db.Decimal(12, 2)
+  unitPrice  Decimal      @db.Decimal(10, 2)
+  totalCost  Decimal      @db.Decimal(12, 2)
+  date       DateTime     @default(now())
+  notes      String?
+  createdAt  DateTime     @default(now())
+}
+
+model SalesAgent {
+  id            String            @id @default(cuid())
+  code          String            @unique
+  name          String
+  phone         String
+  commissionPct Decimal           @default(2) @db.Decimal(5, 2)
+  isActive      Boolean           @default(true)
+  customers     Customer[]
+  orders        Order[]
+  commissions   AgentCommission[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model BrickRateCard {
+  id            String        @id @default(cuid())
+  brickGrade    BrickGrade
+  customerType  CustomerType?
+  ratePerBrick  Decimal       @db.Decimal(8, 2)
+  effectiveFrom DateTime      @db.Date
+  effectiveTo   DateTime?     @db.Date
+  notes         String?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+
+  @@index([brickGrade, effectiveFrom])
+  @@index([isActive])
+}
+
+model Customer {
+  id            String       @id @default(cuid())
+  name          String
+  phone         String
+  cnic          String?
+  companyName   String?
+  customerType  CustomerType @default(BUILDER)
+  contactPerson String?
+  email         String?
+  address       String?
+  city          String?
+  notes         String?
+  balance       Decimal      @default(0) @db.Decimal(12, 2)
+  creditLimit   Decimal      @default(0) @db.Decimal(12, 2)
+  salesAgentId  String?
+  salesAgent    SalesAgent?  @relation(fields: [salesAgentId], references: [id])
+  orders        Order[]
+  payments      Transaction[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([name])
+  @@index([phone])
+  @@index([customerType])
+  @@index([salesAgentId])
+}
+
+model Order {
+  id               String           @id @default(cuid())
+  orderNumber      String           @unique
+  customerId       String
+  customer         Customer         @relation(fields: [customerId], references: [id])
+  salesAgentId     String?
+  salesAgent       SalesAgent?      @relation(fields: [salesAgentId], references: [id])
+  brickGrade       BrickGrade       @default(GRADE_A)
+  quantity         Int
+  ratePerBrick     Decimal          @db.Decimal(8, 2)
+  totalAmount      Decimal          @db.Decimal(12, 2)
+  paidAmount       Decimal          @default(0) @db.Decimal(12, 2)
+  commissionAmount Decimal          @default(0) @db.Decimal(12, 2)
+  status           OrderStatus      @default(PENDING)
+  paymentStatus    PaymentStatus    @default(PENDING)
+  orderDate        DateTime         @default(now())
+  deliveryDate     DateTime?
+  dispatches       Dispatch[]
+  commission       AgentCommission?
+  invoice          Invoice?
+  createdAt        DateTime         @default(now())
+
+  @@index([salesAgentId])
+  @@index([status])
+}
+
+model AgentCommission {
+  id        String     @id @default(cuid())
+  agentId   String
+  agent     SalesAgent @relation(fields: [agentId], references: [id])
+  orderId   String     @unique
+  order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Decimal    @db.Decimal(12, 2)
+  isPaid    Boolean    @default(false)
+  paidAt    DateTime?
+  createdAt DateTime   @default(now())
+
+  @@index([agentId])
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  orderId       String   @unique
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount        Decimal  @db.Decimal(12, 2)
+  taxAmount     Decimal  @default(0) @db.Decimal(12, 2)
+  ntn           String?
+  issuedAt      DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
+}
+
+model Vehicle {
+  id              String    @id @default(cuid())
+  registration    String    @unique
+  label           String?
+  driverName      String
+  driverPhone     String?
+  driverWorkerId  String?
+  driverWorker    Worker?   @relation(fields: [driverWorkerId], references: [id])
+  capacityBricks  Int       @default(5000)
+  isActive        Boolean   @default(true)
+  notes           String?
+  dispatches      Dispatch[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isActive])
+}
+
+model Dispatch {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id])
+  vehicleId       String?
+  vehicle         Vehicle?       @relation(fields: [vehicleId], references: [id])
+  truckNumber     String
+  driverName      String
+  driverPhone     String?
+  bricksLoaded    Int
+  challanNo       String         @unique
+  biltyNo         String?
+  transporterName String?
+  freightAmount   Decimal        @default(0) @db.Decimal(12, 2)
+  deliveryStatus  DeliveryStatus @default(PENDING)
+  receiverName    String?
+  receiverCnic    String?
+  deliveredAt     DateTime?
+  dispatchDate    DateTime       @default(now())
+  notes           String?
+  createdAt       DateTime       @default(now())
+
+  @@index([orderId])
+  @@index([dispatchDate])
+  @@index([deliveryStatus])
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  type            TransactionType
+  amount          Decimal         @db.Decimal(12, 2)
+  description     String
+  descriptionUrdu String?
+  category        String?
+  reference       String?
+  customerId      String?
+  customer        Customer?       @relation(fields: [customerId], references: [id])
+  workerId        String?
+  worker          Worker?         @relation(fields: [workerId], references: [id])
+  date            DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+
+  @@index([type])
+  @@index([date])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  title       String
+  titleUrdu   String?
+  amount      Decimal  @db.Decimal(12, 2)
+  category    String
+  date        DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model KilnLog {
+  id          String   @id @default(cuid())
+  kilnId      String?
+  kiln        Kiln?    @relation(fields: [kilnId], references: [id])
+  temperature Decimal  @db.Decimal(5, 2)
+  fuelUsed    Decimal  @db.Decimal(10, 2)
+  fuelType    String   @default("Coal")
+  cycleNumber Int
+  recordedAt  DateTime @default(now())
+  notes       String?
+
+  @@index([kilnId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("info")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model WeatherLog {
+  id          String   @id @default(cuid())
+  temperature Decimal  @db.Decimal(5, 2)
+  humidity    Decimal  @db.Decimal(5, 2)
+  condition   String
+  recordedAt  DateTime @default(now())
+}

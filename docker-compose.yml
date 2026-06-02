@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smart-bhatha-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bhatha
+      POSTGRES_PASSWORD: bhatha123
+      POSTGRES_DB: smart_bhatha
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bhatha -d smart_bhatha"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: smart-bhatha-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://bhatha:bhatha123@postgres:5432/smart_bhatha?schema=public
+      JWT_SECRET: ${JWT_SECRET:-smart-bhatha-production-secret}
+      JWT_EXPIRES_IN: 7d
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/* Industrial Cinema — Stitch design system */
+@theme inline {
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-variant: var(--surface-variant);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+  --color-brick: #b7410e;
+  --color-clay: #d2691e;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-urdu: "Noto Nastaliq Urdu", serif;
+}
+
+/* Light — warm kiln daylight */
+:root {
+  --background: #fff8f0;
+  --on-background: #3e2723;
+  --surface: #fff8f0;
+  --surface-dim: #f5ede4;
+  --surface-bright: #ffffff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f9f0e6;
+  --surface-container: #f5ede4;
+  --surface-container-high: #ebe0d4;
+  --surface-container-highest: #e0d4c8;
+  --surface-variant: #ebe0d4;
+  --on-surface: #3e2723;
+  --on-surface-variant: #6b5b4f;
+  --outline: #a78a81;
+  --outline-variant: #d4c4bc;
+  --primary: #b7410e;
+  --on-primary: #ffffff;
+  --primary-container: #ffdbcf;
+  --on-primary-container: #5c1a00;
+  --secondary: #8a4901;
+  --on-secondary: #ffffff;
+  --secondary-container: #ffdcc3;
+  --on-secondary-container: #4d2600;
+  --tertiary: #7b6549;
+  --on-tertiary-container: #3e2d16;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --glass-fill: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(183, 65, 14, 0.12);
+  --heat-glow: rgba(183, 65, 14, 0.15);
+}
+
+/* Dark — cinematic coal (Stitch default) */
+.dark {
+  --background: #131313;
+  --on-background: #e5e2e1;
+  --surface: #131313;
+  --surface-dim: #131313;
+  --surface-bright: #393939;
+  --surface-container-lowest: #0e0e0e;
+  --surface-container-low: #1b1b1c;
+  --surface-container: #202020;
+  --surface-container-high: #2a2a2a;
+  --surface-container-highest: #353535;
+  --surface-variant: #353535;
+  --on-surface: #e5e2e1;
+  --on-surface-variant: #e0c0b5;
+  --outline: #a78a81;
+  --outline-variant: #58423a;
+  --primary: #ffb59c;
+  --on-primary: #5c1a00;
+  --primary-container: #b7410e;
+  --on-primary-container: #ffe2d9;
+  --secondary: #ffb77e;
+  --on-secondary: #4d2600;
+  --secondary-container: #8a4901;
+  --on-secondary-container: #ffc59a;
+  --tertiary: #dec2a1;
+  --on-tertiary-container: #ffe4c6;
+  --error: #ffb4ab;
+  --error-container: #93000a;
+  --glass-fill: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --heat-glow: rgba(183, 65, 14, 0.2);
+}
+
+body {
+  background: var(--background);
+  color: var(--on-background);
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+
+/* Easier UI for staff with low computer literacy */
+.easy-tap {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.easy-page {
+  font-size: 1rem;
+}
+
+.easy-page label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.easy-page input,
+.easy-page select,
+.easy-page textarea {
+  min-height: 48px;
+  font-size: 1rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.easy-page button[data-size="default"],
+.easy-page .easy-btn-lg {
+  min-height: 48px;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.table-premium th {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.table-premium td {
+  font-size: 0.95rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-urdu {
+  font-family: var(--font-urdu);
+  line-height: 1.75;
+}
+
+/* Glass & industrial utilities */
+.glass-card {
+  background: var(--glass-fill);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.75rem;
+}
+
+.heat-glow {
+  transition: box-shadow 0.3s, border-color 0.3s, background 0.3s;
+}
+
+.heat-glow:hover {
+  box-shadow: 0 0 40px var(--heat-glow);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+.bg-smoke {
+  background-image:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary-container) 8%, transparent) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+.bg-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5z' fill='%23b7410e' fill-opacity='0.06' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.dark .bg-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5z' fill='%232a2a2a' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--primary), var(--tertiary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #b7410e 0%, #8a4901 100%);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  color: var(--on-surface);
+}
+
+.table-stitch thead th {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.table-stitch tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--on-surface) 3%, transparent);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--primary-container) 50%, transparent);
+  border-radius: 3px;
+}

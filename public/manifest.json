@@ -1,0 +1,12 @@
+{
+  "name": "Smart Brick Agency",
+  "short_name": "Smart Brick",
+  "description": "Brick kiln management — workers, production, finance, dispatch",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#B7410E",
+  "theme_color": "#B7410E",
+  "icons": [
+    { "src": "/brand/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
